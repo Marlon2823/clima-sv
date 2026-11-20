@@ -1,5 +1,5 @@
 /* Constantes: paletas de cada estado del clima, departamentos y versión de la app. */
-const APP_VERSION='18';
+const APP_VERSION='24';
 const S={
 sun:{n:'Soleado',e:'☀️',a:'#2e8bd8',b:'#9bd6f7',t:32,f:35,r:5,c:10,uv:10,w:12,dir:60,h:46,sun:.55},
 cloud:{n:'Nublado',e:'⛅',a:'#5d7388',b:'#b3c2d0',t:27,f:29,r:25,c:78,uv:4,w:18,dir:120,h:68,sun:.55},
@@ -40,7 +40,7 @@ function rnow(){return cur==='rain'||cur==='storm'}
 /* Ajustes: preferencias guardadas en el celular y la pantalla de ajustes. */
 const AVISOS_KEYS=['aTormenta','aLluvia','aViento','aCalor','aAire','aOleaje'];
 const AVISO_ETIQ=[['aTormenta','⛈️ Tormenta eléctrica'],['aLluvia','🌧️ Lluvia intensa'],['aViento','💨 Viento fuerte'],['aCalor','🥵 Calor intenso'],['aAire','🌫️ Aire dañino'],['aOleaje','🌊 Oleaje fuerte']];
-const AJ_BASE={tema:'auto',ahorro:false,ahorroAuto:true,volumen:90,sRain:true,sBirds:true,sNight:true,aTormenta:true,aLluvia:true,aViento:true,aCalor:true,aAire:true,aOleaje:true,lugarInicio:'ultimo'};
+const AJ_BASE={tema:'auto',ahorro:false,ahorroAuto:true,volumen:90,sRain:true,sBirds:true,sNight:true,gotas:true,inclinar:true,vibrar:true,sGato:true,aTormenta:true,aLluvia:true,aViento:true,aCalor:true,aAire:true,aOleaje:true,lugarInicio:'ultimo'};
 let AJ={...AJ_BASE};
 function cargarAjustes(){let o=null;try{o=JSON.parse(localStorage.getItem('ajustes'))}catch(e){}
 AJ={...AJ_BASE,...(o||{})};
@@ -50,31 +50,32 @@ function swHTML(id,txt,on,nota){return '<label class="sw"><span>'+txt+(nota?'<sm
 function abrirAjustes(){const mb=$('mb');mb.className='wide';const F=favs(),nW=Object.keys(localStorage).filter(k=>k.startsWith('wx:')).length;
 const seg=(id,lst,cur)=>'<div class="chips" id="'+id+'">'+lst.map(t=>'<button data-v="'+t[0]+'"'+(cur===t[0]?' class="on"':'')+'>'+t[1]+'</button>').join('')+'</div>';
 mb.innerHTML='<button id="mx" aria-label="Cerrar">✕</button><h3>⚙️ Ajustes</h3><div id="ajw">'
-+'<h4 class="ajh">Apariencia</h4>'+seg('ajtema',[['auto','🌓 Auto'],['dark','🌙 Oscuro'],['light','☀️ Claro']],AJ.tema)+'<p class="note">Auto: se oscurece de noche o si tu celular usa modo oscuro.</p>'
-+'<h4 class="ajh">Sonido</h4>'+swHTML('ajson','Activar sonido',want,'Se apaga al cerrar la app')+'<div class="sw"><span>Volumen</span><input type="range" id="ajvol" min="10" max="100" step="5" value="'+AJ.volumen+'" aria-label="Volumen"></div>'
-+swHTML('ajrain','Lluvia y truenos',AJ.sRain)+swHTML('ajbirds','Pájaros (día cálido)',AJ.sBirds)+swHTML('ajnight','Grillos, ranas y búho (noche)',AJ.sNight)
-+'<h4 class="ajh">Batería y animaciones</h4>'+swHTML('ajsaver','Modo ahorro',SAVER,'Sin animaciones ni sonido y menos actualizaciones')+swHTML('ajsauto','Activarlo con batería baja (15 %)',AJ.ahorroAuto)
-+'<h4 class="ajh">Avisos del clima</h4>'+AVISO_ETIQ.map(a=>swHTML('aj_'+a[0],a[1],AJ[a[0]])).join('')
-+'<h4 class="ajh">Lugares</h4><p class="note" style="margin-bottom:4px">Al abrir la app mostrar:</p>'+seg('ajinicio',[['ultimo','📌 El último lugar'],['gps','📍 Mi ubicación']],AJ.lugarInicio)
++'<h4 class="ajh">🎨 Apariencia</h4>'+seg('ajtema',[['auto','🌓 Auto'],['dark','🌙 Oscuro'],['light','☀️ Claro']],AJ.tema)+'<p class="note">Auto: se oscurece de noche o si tu celular usa modo oscuro.</p>'
++'<h4 class="ajh">🔊 Sonido</h4>'+swHTML('ajson','Activar sonido',want,'Se apaga al cerrar la app')+'<div class="sw"><span>Volumen</span><input type="range" id="ajvol" min="10" max="100" step="5" value="'+AJ.volumen+'" aria-label="Volumen"></div>'
++swHTML('ajgato','El gato maúlla al tocarlo',AJ.sGato)+swHTML('ajrain','Lluvia y truenos',AJ.sRain)+swHTML('ajbirds','Pájaros (día cálido)',AJ.sBirds)+swHTML('ajnight','Grillos, ranas y búho (noche)',AJ.sNight)
++'<h4 class="ajh">🔋 Batería y animaciones</h4>'+swHTML('ajsaver','Modo ahorro',SAVER,'Sin animaciones ni sonido y menos actualizaciones')+swHTML('ajsauto','Activarlo con batería baja (15 %)',AJ.ahorroAuto)+swHTML('ajgotas','Gotas en el cristal (con lluvia)',AJ.gotas)+swHTML('ajinclinar','Efecto 3D al inclinar el celular',AJ.inclinar)+swHTML('ajvibrar','Vibrar con los truenos',AJ.vibrar)
++'<h4 class="ajh">⚠️ Avisos del clima</h4>'+AVISO_ETIQ.map(a=>swHTML('aj_'+a[0],a[1],AJ[a[0]])).join('')
++'<h4 class="ajh">📍 Lugares</h4><p class="note" style="margin-bottom:4px">Al abrir la app mostrar:</p>'+seg('ajinicio',[['ultimo','📌 El último lugar'],['gps','📍 Mi ubicación']],AJ.lugarInicio)
 +'<p class="note" style="margin:10px 0 2px">Favoritos:</p>'+(F.length?F.map((f,i)=>'<div class="fvr"><span>⭐ '+esc(f.name)+'</span><button data-q="'+i+'" aria-label="Quitar de favoritos">✕</button></div>').join(''):'<p class="note">Aún no tienes favoritos. Búscalos con el botón de abajo y toca la ☆.</p>')
 +'<div class="lk"><button class="mapbtn" id="ajbuscar">🔍 Buscar lugar</button></div>'
-+'<h4 class="ajh">Datos</h4><p class="note">Pronósticos guardados para usar sin internet: '+nW+(nW===1?' lugar.':' lugares.')+'</p><div class="lk"><button class="mapbtn" id="ajborrar">Borrar pronósticos guardados</button><button class="mapbtn" id="ajreset">Restablecer ajustes</button></div>'
-+'<h4 class="ajh">Acerca de</h4><p class="note">Versión '+APP_VERSION+'. Datos: Open-Meteo.com. Aire: CAMS/Copernicus. Oleaje: DWD. Radar: RainViewer. Mapas © OpenStreetMap. Los avisos del clima los calcula la app con el pronóstico y no son avisos oficiales.</p><div class="lk"><a href="https://www.marn.gob.sv" target="_blank" rel="noopener">🏛️ MARN</a><a href="https://x.com/PROCIVILSV" target="_blank" rel="noopener">🚨 Protección Civil</a></div></div>';
++'<h4 class="ajh">💾 Datos</h4><p class="note">Pronósticos guardados para usar sin internet: '+nW+(nW===1?' lugar.':' lugares.')+'</p><div class="lk"><button class="mapbtn" id="ajborrar">Borrar pronósticos guardados</button><button class="mapbtn" id="ajreset">Restablecer ajustes</button></div>'
++'<h4 class="ajh">ℹ️ Acerca de</h4><p class="note">Versión '+APP_VERSION+'. Datos: Open-Meteo.com. Aire: CAMS/Copernicus. Oleaje y mareas: Copernicus Marine, ECMWF, NOAA y DWD. Radar: RainViewer. Mapas © OpenStreetMap. Los avisos del clima los calcula la app con el pronóstico y no son avisos oficiales.</p><div class="lk"><a href="https://www.ambiente.gob.sv" target="_blank" rel="noopener">🏛️ Ministerio de Medio Ambiente</a><a href="https://x.com/MedioAmbienteSV" target="_blank" rel="noopener">📣 @MedioAmbienteSV</a><a href="https://x.com/PROCIVILSV" target="_blank" rel="noopener">🚨 Protección Civil</a></div></div>';
 $('md').classList.add('on');const w=$('ajw');
 const refrescar=()=>{const y=mb.scrollTop;abrirAjustes();mb.scrollTop=y};
 w.onchange=e=>{const t=e.target,id=t.id;if(id==='ajson'){setSnd(t.checked);t.checked=want;return}
 if(id==='ajsaver'){setSaver(t.checked,true);t.checked=SAVER;return}
-const m={ajrain:'sRain',ajbirds:'sBirds',ajnight:'sNight',ajsauto:'ahorroAuto'};
-if(m[id]){AJ[m[id]]=t.checked;guardarAjustes();updateSound();return}
-if(id.startsWith('aj_')){AJ[id.slice(3)]=t.checked;guardarAjustes();render();return}};
+const m={ajrain:'sRain',ajbirds:'sBirds',ajnight:'sNight',ajsauto:'ahorroAuto',ajgato:'sGato',ajgotas:'gotas',ajinclinar:'inclinar',ajvibrar:'vibrar'};
+if(m[id]){AJ[m[id]]=t.checked;guardarAjustes();updateSound();kickCristal();return}
+if(id.startsWith('aj_')){AJ[id.slice(3)]=t.checked;guardarAjustes();refrescarAvisos();return}};
 w.oninput=e=>{if(e.target.id==='ajvol'){AJ.volumen=+e.target.value;guardarAjustes();aplicarVolumen()}};
 w.onclick=e=>{const b=e.target.closest('button,a');if(!b)return;const p=b.parentElement&&b.parentElement.id;
-if(p==='ajtema'){AJ.tema=b.dataset.v;guardarAjustes();render();refrescar();return}
+if(p==='ajtema'){AJ.tema=b.dataset.v;guardarAjustes();applyTheme(cs());refrescar();return}
 if(p==='ajinicio'){AJ.lugarInicio=b.dataset.v;guardarAjustes();refrescar();return}
 if(b.dataset.q!==undefined){quitarFav(+b.dataset.q);refrescar();return}
 if(b.id==='ajbuscar'){openSearch();return}
 if(b.id==='ajborrar'){if(confirm('¿Borrar los pronósticos guardados? Tendrás que abrir cada lugar con internet para volver a guardarlos.')){Object.keys(localStorage).filter(k=>k.startsWith('wx:')).forEach(k=>localStorage.removeItem(k));EX={};toast('🗑️ Pronósticos guardados borrados');refrescar()}return}
 if(b.id==='ajreset'){if(confirm('¿Restablecer todos los ajustes a los valores originales? Tus favoritos no se borran.')){AJ={...AJ_BASE};try{localStorage.removeItem('theme');localStorage.removeItem('saver')}catch(_){}guardarAjustes();setSaver(false,true);if(want)setSnd(false);aplicarVolumen();updateSound();render();toast('↩️ Ajustes restablecidos');refrescar()}}}}
+function refrescarAvisos(){const g2=$('g'),c=g2&&g2.querySelector('.card.wide');if(c&&/Avisos del clima/.test(c.textContent))c.outerHTML=alertsHTML(cs())}
 function iniciarAjustes(){$('ajbtn').onclick=abrirAjustes}
 
 /* Tema claro/oscuro (la elección vive en AJ.tema, ver ajustes.js). */
@@ -88,7 +89,7 @@ try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if
 /* Modo ahorro de batería (la preferencia vive en AJ.ahorro, ver ajustes.js). */
 let SAVER=false;
 function setSaver(on,silent){SAVER=on;AJ.ahorro=on;guardarAjustes();document.documentElement.classList.toggle('sv',on);
-if(on){if(want)setSnd(false);kick()}else kick();if(!silent)toast(on?'🔋 Modo ahorro: sin animaciones ni sonido, menos actualizaciones':'⚡ Modo ahorro apagado')}
+if(on){if(want)setSnd(false);kick()}else kick();kickCristal();if(!silent)toast(on?'🔋 Modo ahorro: sin animaciones ni sonido, menos actualizaciones':'⚡ Modo ahorro apagado')}
 function iniciarAhorro(){
 SAVER=AJ.ahorro;
 document.documentElement.classList.toggle('sv',SAVER);
@@ -112,7 +113,7 @@ if(s.mar&&s.mar.km<=30&&Math.max(...s.mar.h)>=2.5)o.push({k:'aOleaje',l:'ojo',i:
 return o.filter(a=>AJ[a.k])}
 function alertsHTML(s){const A=alertsFor(s);
 return '<div class="card wide"><h2>⚠️ Avisos del clima</h2>'+(A.length?A.map(a=>'<div class="al '+a.l+'"><span class="ic">'+a.i+'</span><div><b>'+(a.l==='no'?'Alerta: ':'Precaución: ')+a.t+'</b><small>'+a.x+'</small></div></div>').join(''):'<div class="al ok"><span class="ic">✅</span><div><b>Sin avisos por ahora</b><small>'+(AVISOS_KEYS.some(k=>!AJ[k])?'No hay avisos activos por ahora. Tienes algunos avisos desactivados en Ajustes.':'Con el pronóstico actual no se esperan tormentas, lluvias intensas, viento fuerte ni calor extremo en las próximas 24 horas.')+'</small></div></div>')+
-'<p class="note">Estos avisos los calcula la app con el pronóstico; no son avisos oficiales. Para alertas oficiales (verde, amarilla, naranja o roja):</p><div class="lk"><a href="https://www.marn.gob.sv" target="_blank" rel="noopener">🏛️ MARN</a><a href="https://x.com/PROCIVILSV" target="_blank" rel="noopener">🚨 Protección Civil</a></div></div>'}
+'<p class="note">Estos avisos los calcula la app con el pronóstico; no son avisos oficiales. Para alertas oficiales (verde, amarilla, naranja o roja):</p><div class="lk"><a href="https://www.ambiente.gob.sv" target="_blank" rel="noopener">🏛️ Ministerio de Medio Ambiente</a><a href="https://x.com/MedioAmbienteSV" target="_blank" rel="noopener">📣 @MedioAmbienteSV</a><a href="https://x.com/PROCIVILSV" target="_blank" rel="noopener">🚨 Protección Civil</a></div></div>'}
 function stateLabel(s){if(cur==='night'){const h=nowH();if(h<5)return '🌙 Madrugada';if(h<8)return '🌅 Amanecer'}return s.e+' '+s.n}
 function late(h){return h>=22?'Ya es tarde':'Es de madrugada'}
 function poseFor(h){const s=cs();
@@ -186,7 +187,7 @@ let lastPose='';
 function drawCat(){const h=nowH(),p=poseFor(h),c=$('cat');
 if(p===lastPose&&c.querySelector('img')){const b=c.querySelector('.bub');if(b)b.textContent=tipFor(p,h);return}
 lastPose=p;
-c.innerHTML='<div class="cpic'+(p==='frio'?' shiver':'')+'"><img src="gato-'+p+'.webp" alt="" width="768" height="768"></div><div class="bub">'+tipFor(p,h)+'</div>';
+c.innerHTML='<div class="cpic'+(p==='frio'?' shiver':'')+'" role="button" tabindex="0" aria-label="Acariciar al gato"><img src="gato-'+p+'.webp" alt="" width="768" height="768"></div><div class="bub">'+tipFor(p,h)+'</div>';
 c.querySelector('img').onerror=()=>{lastPose='';drawCatSVG()}}
 function drawCatSVG(){
 const k=cur,f='#f0a04b';
@@ -210,6 +211,16 @@ if(k==='night')s+='<path d="M70 55L120 -5L138 52Z" fill="#c0392b"/><rect x="66" 
 $('cat').innerHTML='<div class="bub">'+TIP[k]+'</div><svg viewBox="0 -30 200 255" class="'+(k==='cold'?'shiver':'')+'" aria-hidden="true">'+s+'</svg>';
 }
 
+const GATO_MSG={gen:['¡Miau!','¡Cosquillas!','Prrrr… 😻','¿Ya es hora de comer?','¡Me gusta que me toques!'],sol:['¡Con estilo, ¿no? 😎','¡Qué calor!'],lluvia:['¡Cuidado con mi paraguas! ☂️','¡No me mojes!'],frio:['Brrr… ¡qué frío!','¿Me prestas tu abrigo?'],noche:['Zzz… ¡me despertaste!','Shhh… estoy durmiendo 😴'],manana:['¿Me das un cafecito? ☕','¡Buenos días!'],ejercicio:['¡Uno, dos, uno, dos! 💪','¡Casi llego a la meta!'],casa:['¡Mi chocolatito! 🍫','Película y manta, ¡qué rico!']};
+let gatoMsgT=null,gatoUlt='';
+function corazones(c){const n=1+(Math.random()*2|0);for(let i=0;i<n;i++){const e=document.createElement('span');e.className='cz';e.textContent=['❤️','💖','😻'][Math.random()*3|0];e.style.left=(30+Math.random()*40)+'%';e.style.animationDelay=(i*.12)+'s';c.appendChild(e);setTimeout(()=>e.remove(),1500)}}
+function tocarGato(){const c=$('cat'),pic=c.querySelector('.cpic'),b=c.querySelector('.bub');if(!pic)return;
+pic.classList.remove('salto');void pic.offsetWidth;pic.classList.add('salto');setTimeout(()=>pic.classList.remove('salto'),600);
+const lst=(GATO_MSG[lastPose]||[]).concat(GATO_MSG.gen);let m;do{m=lst[Math.random()*lst.length|0]}while(m===gatoUlt&&lst.length>1);gatoUlt=m;
+if(b){b.textContent=m;clearTimeout(gatoMsgT);gatoMsgT=setTimeout(()=>{const bb=$('cat').querySelector('.bub');if(bb)bb.textContent=tipFor(lastPose,nowH())},3200)}
+miau();if(!(SAVER||NOANIM))corazones(c)}
+function iniciarGato(){const c=$('cat');c.addEventListener('click',e=>{if(e.target.closest('.cpic'))tocarGato()});c.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('.cpic')){e.preventDefault();tocarGato()}})}
+
 /* Pantalla principal: tarjetas, gráficas de 24 h y 7 días, ventanas de detalle. */
 function arc(s){const p=s.sun;let d='';if(p!==null){const x=100-90*Math.cos(Math.PI*p),y=90-90*Math.sin(Math.PI*p);d='<circle cx="'+x+'" cy="'+y+'" r="7" fill="#ffd54a"/>'}
 return '<svg viewBox="0 0 200 100" width="220" aria-hidden="true"><path d="M10 90 A90 90 0 0 1 190 90" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-dasharray="4 5"/>'+d+'<text x="10" y="99" font-size="9" fill="#fff">'+(s.sr||'5:41')+'</text><text x="168" y="99" font-size="9" fill="#fff">'+(s.ss||'17:36')+'</text></svg>'}
@@ -226,7 +237,9 @@ return '<div class="chips">'+Object.keys(lb).map(k=>'<button data-m="'+k+'"'+(k=
 function drawH24(s){const el=$('h24c');if(!el)return;const old=el.querySelector('.hscroll'),sl=old?old.scrollLeft:0;el.innerHTML=h24HTML(s);const nw=el.querySelector('.hscroll');if(nw)nw.scrollLeft=sl;el.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>{hMode=b.dataset.m;drawH24(s)})}
 function d7HTML(s){const Q=s.d7||syn7(s),mn=Math.min(...Q.map(d=>d.mn)),mx=Math.max(...Q.map(d=>d.mx)),sp=(mx-mn)||1;
 return Q.map(d=>'<div class="w7"><span class="nm">'+d.n+'</span><span class="ic">'+d.e+'</span><span class="rn">💧'+d.r+'%</span><span class="lo">'+d.mn+'°</span><span class="bar"><i style="left:'+(100*(d.mn-mn)/sp)+'%;width:'+Math.max(6,100*(d.mx-d.mn)/sp)+'%"></i></span><span class="hi">'+d.mx+'°</span></div>').join('')}
-function render(){
+let HORA_R=-1;
+function render(){const sy=window.scrollY;renderInner();HORA_R=nowH();if(sy>0)window.scrollTo(0,sy)}
+function renderInner(){
 const s=cs();
 applyTheme(s);
 $('t').textContent=s.t+'°';$('c').textContent=stateLabel(s);$('s').textContent='Sensación '+s.f+'° · Máx '+(s.tmax??s.t+3)+'° · Mín '+(s.tmin??s.t-8)+'°';
@@ -246,30 +259,30 @@ drawCat();wire(s);
 setup();
 }
 function scl(a,i){return '<div class="sc">'+a.map((x,j)=>'<span'+(j===i?' class="on"':'')+'>'+x+'</span>').join('')+'</div>'}
-function detail(k,s){let t,vis,p,sc='';
+function detail(k,s){let t,p,sc='';const vis='<canvas id="dvc" aria-hidden="true"></canvas>';
 if(k==='r'){t='💧 Probabilidad de lluvia';const n=Math.round(s.r/100*14);
-vis=n<1?'<span style="font-size:4rem">🌤️</span>':Array.from({length:n},(_,i)=>'<i style="position:absolute;left:'+(4+i*(92/n))+'%;top:0;width:4px;height:14px;border-radius:4px;background:#cfe8ff;animation:drop '+(1+(i%4)*.35)+'s linear '+(i*.17)+'s infinite"></i>').join('');
+
 p=(rnow()?'Está lloviendo ahora. ':'Es la probabilidad de lluvia medible en esta hora. ')+(rnow()?'Lleva paraguas y evita ríos y quebradas.':s.r<20?'Es baja: puedes planear al aire libre.':s.r<60?'Hay posibilidad de chubascos: ten un plan B.':'Es alta: lleva paraguas y evita ríos y quebradas.');
 sc=scl(['0–19 % baja','20–59 % posible','60 %+ alta'],s.r<20?0:s.r<60?1:2)}
 else if(k==='c'){t='☁️ Nubosidad';const n=Math.max(1,Math.round(s.c/25));
-vis=Array.from({length:n},(_,i)=>'<span style="font-size:'+(2.6+s.c/50)+'rem;opacity:'+(.6+.4*(i%2))+';animation:drift '+(3+i)+'s ease-in-out '+(i*.4)+'s infinite alternate">☁️</span>').join('');
+
 p='Porcentaje del cielo cubierto por nubes. '+(s.c<25?(isDark(nowH())?'El cielo está casi despejado: buena noche para ver las estrellas.':'El cielo está casi despejado.'):s.c<70?'Hay nubes y claros.':'El cielo está cubierto: baja el sol directo y sube la humedad.');
 sc=scl(['0–24 % despejado','25–69 % parcial','70 %+ cubierto'],s.c<25?0:s.c<70?1:2)}
 else if(k==='u'){t='🕶️ Índice UV';const u=s.uv;
-vis='<span style="font-size:5rem;display:inline-block;animation:pulse 2s ease-in-out infinite">'+(isDark(nowH())?'🌙':rnow()?'🌦️':'☀️')+'</span>';
+
 p=isDark(nowH())?'Es de noche: no hay radiación UV. (Guía general de la OMS.)':(rnow()&&u<=5?'Con lluvia y nubes el UV baja, pero no desaparece del todo. ':'')+(u<=2?'No necesitas protección especial.':u<=5?'Usa protector y sombrero si estarás varias horas afuera.':u<=7?'Alto: protector, gorra y gafas; busca sombra al mediodía.':u<=10?'Muy alto: evita el sol directo de 10 a 15 h y reaplica protector cada 2 horas.':'Extremo: evita salir al sol del mediodía y cúbrete.')+' (Guía general de la OMS.)';
 sc=scl(['0–2 bajo','3–5 moderado','6–7 alto','8–10 muy alto','11+ extremo'],u<=2?0:u<=5?1:u<=7?2:u<=10?3:4)}
 else if(k==='w'){t='🍃 Viento';const d=Math.max(.8,18/Math.max(s.w,2)),f=(s.dir+180)%360,cd=['N','NE','E','SE','S','SO','O','NO'][Math.round(f/45)%8];
-vis='<svg viewBox="0 0 100 100" width="130" aria-hidden="true" style="animation:spin '+d+'s linear infinite"><g fill="#fff"><path d="M50 50L50 8Q72 24 50 50Z"/><path d="M50 50L92 50Q76 72 50 50Z"/><path d="M50 50L50 92Q28 76 50 50Z"/><path d="M50 50L8 50Q24 28 50 50Z"/></g><circle cx="50" cy="50" r="6" fill="#ffd54a"/></svg>';
+
 p=s.w+' km/h, del '+cd+'. '+(s.w<12?'Brisa ligera.':s.w<29?'Viento moderado: se mueven hojas y ramas pequeñas.':s.w<50?'Viento fuerte: asegura objetos sueltos y aléjate de árboles y vallas.':'Viento muy fuerte: quédate en un lugar seguro.');
 sc=scl(['menos de 12 ligero','12–28 moderado','29–49 fuerte','50+ muy fuerte'],s.w<12?0:s.w<29?1:s.w<50?2:3)}
 else if(k==='h'){t='💦 Humedad';
-vis='<div style="width:120px;height:120px;border:3px solid #fff;border-radius:50%;position:relative;overflow:hidden"><div style="position:absolute;left:-20%;right:-20%;bottom:0;height:'+s.h+'%;background:rgba(130,200,255,.9)"><div style="position:absolute;left:0;right:0;top:-8px;height:16px;border-radius:50%;background:rgba(130,200,255,.9);animation:drift 2.5s ease-in-out infinite alternate"></div></div><b style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem">'+s.h+'%</b></div>';
+
 p=s.h<40?'Aire seco: hidrátate y cuida tu piel.':s.h<70?'Humedad cómoda.':'Aire muy húmedo: se siente más calor (sensación de '+s.f+'°)'+(rnow()?' y la lluvia mantiene el ambiente húmedo.':' y puede haber lluvia.');
 sc=scl(['menos de 40 % seco','40–69 % cómodo','70 %+ húmedo'],s.h<40?0:s.h<70?1:2)}
-else{t='🌅 Sol';vis='<div style="animation:pulse 3s ease-in-out infinite">'+arc(s)+'</div>';p='Amanece a las '+(s.sr||'5:41')+' y atardece a las '+(s.ss||'17:36')+'. '+((s.sun===null||(!D&&isDark(nowH())))?(nowH()<12?'Todavía no sale el sol.':'Ahora es de noche.'):'El punto amarillo marca dónde va el sol ahora.'+(rnow()||s.c>=85?' Hoy está tapado por las nubes.':''))}
+else{t='🌅 Sol';p='Amanece a las '+(s.sr||'5:41')+' y atardece a las '+(s.ss||'17:36')+'. '+((s.sun===null||(!D&&isDark(nowH())))?(nowH()<12?'Todavía no sale el sol.':'Ahora es de noche.'):'El punto amarillo marca dónde va el sol ahora.'+(rnow()||s.c>=85?' Hoy está tapado por las nubes.':''))}
 return {t,vis,p,sc}}
-function openM(k,s){const d=detail(k,s);$('mb').className='';$('mb').innerHTML='<button id="mx" aria-label="Cerrar">✕</button><h3>'+d.t+'</h3><div class="vis">'+d.vis+'</div><p>'+d.p+'</p>'+d.sc;$('md').classList.add('on')}
+function openM(k,s){const d=detail(k,s);$('mb').className='';$('mb').innerHTML='<button id="mx" aria-label="Cerrar">✕</button><h3>'+d.t+'</h3><div class="vis">'+d.vis+'</div><p>'+d.p+'</p>'+d.sc;$('md').classList.add('on');iniciarEscena(k,s)}
 function wire(s){document.querySelectorAll('.tap').forEach(el=>{const f=()=>openM(el.dataset.k,s);el.onclick=f;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f()}}});$('g').insertAdjacentHTML('beforeend',actsHTML(s)+'<div class="card wide"><h2>📤 Compartir</h2><p class="note">Crea una imagen con el clima de hoy para enviarla por WhatsApp.</p><button class="mapbtn" id="shbtn" style="width:100%;margin-top:6px">Compartir como imagen</button></div>');drawH24(s);drawExtras();const rb=$('radarb');if(rb)rb.onclick=openRadar;$('shbtn').onclick=shareImg}
 function hideSplash(){const el=$('splash');if(!el)return;setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),700)},Math.max(0,1500-performance.now()))}
 function iniciarPestanas(){
@@ -281,11 +294,80 @@ $('md').onclick=e=>{if(e.target.id==='md'||e.target.id==='mx')$('md').classList.
 addEventListener('keydown',e=>{if(e.key==='Escape')$('md').classList.remove('on')});
 }
 
+/* Escenas animadas de las ventanas de detalle (lluvia, nubes, UV, viento, humedad, sol). Se dibujan con los datos reales. */
+const NUBE_CLARA=['rgba(255,255,255,.97)','rgba(215,230,245,.9)'],NUBE_OSCURA=['rgba(135,145,165,.97)','rgba(85,95,115,.9)'];
+function nubeDib(c,x,y,r,a,col){c.save();c.globalAlpha=a;const g1=c.createRadialGradient(x,y-r*.3,r*.1,x,y,r*1.4);g1.addColorStop(0,col[0]);g1.addColorStop(1,col[1]);c.fillStyle=g1;
+for(const b of [[-.9,.15,.62],[-.35,-.2,.78],[.3,-.1,.7],[.85,.18,.58],[0,.25,.8]]){c.beginPath();c.arc(x+b[0]*r,y+b[1]*r,b[2]*r,0,7);c.fill()}c.restore()}
+function sol(c,x,y,r,t,k){const R2=r*(3+k*2.5),g1=c.createRadialGradient(x,y,r*.3,x,y,R2);g1.addColorStop(0,'rgba(255,240,170,'+(.55*Math.min(1,.4+k))+')');g1.addColorStop(1,'rgba(255,226,120,0)');c.fillStyle=g1;c.beginPath();c.arc(x,y,R2,0,7);c.fill();
+c.save();c.translate(x,y);c.rotate(t*.6);for(let i=0;i<14;i++){c.rotate(Math.PI/7);const L=r*(1.6+k*1.1)+Math.sin(t*3+i)*3;c.fillStyle='rgba(255,236,150,'+(.5+.3*Math.sin(t*2+i))+')';c.beginPath();c.moveTo(r*1.25,-2.5);c.lineTo(r+L,-.8);c.lineTo(r+L,.8);c.lineTo(r*1.25,2.5);c.fill()}c.restore();
+const g2=c.createRadialGradient(x-r*.3,y-r*.3,r*.2,x,y,r);g2.addColorStop(0,'#fffbe0');g2.addColorStop(.6,'#ffe066');g2.addColorStop(1,'#ffb93b');c.fillStyle=g2;c.beginPath();c.arc(x,y,r,0,7);c.fill()}
+function luna(c,x,y,r){const g1=c.createRadialGradient(x,y,r*.5,x,y,r*3.2);g1.addColorStop(0,'rgba(225,232,255,.35)');g1.addColorStop(1,'rgba(225,232,255,0)');c.fillStyle=g1;c.beginPath();c.arc(x,y,r*3.2,0,7);c.fill();
+const g2=c.createRadialGradient(x-r*.3,y-r*.3,r*.2,x,y,r);g2.addColorStop(0,'#fffdf0');g2.addColorStop(1,'#e3dfc0');c.fillStyle=g2;c.beginPath();c.arc(x,y,r,0,7);c.fill();c.fillStyle='rgba(150,148,125,.28)';[[-.3,-.2,.22],[.28,.15,.28],[-.05,.45,.15]].forEach(q=>{c.beginPath();c.arc(x+q[0]*r,y+q[1]*r,q[2]*r,0,7);c.fill()})}
+function estrellasDib(c,t,st){for(const a of st){c.globalAlpha=.25+.75*Math.abs(Math.sin(t*1.6+a.p));c.fillStyle='#fff';c.beginPath();c.arc(a.x,a.y,1.3,0,7);c.fill()}c.globalAlpha=1}
+function textoGrande(c,txt,x,y,px){c.save();c.textAlign='center';c.fillStyle='rgba(255,255,255,.97)';c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=8;c.font='800 '+px+'px system-ui,sans-serif';c.fillText(txt,x,y);c.restore()}
+const easeEl=k=>k>=1?1:1-Math.pow(1-k,3)*Math.cos(k*Math.PI*3),easeOut=k=>1-Math.pow(1-Math.min(1,k),3);
+const ESC={
+r:{init:(W,H,s)=>({dr:Array.from({length:Math.round(s.r*1.1)},()=>({x:W*.2+Math.random()*W*.6,y:70+Math.random()*(H-90),v:170+Math.random()*140,l:8+Math.random()*9})),ri:[]}),
+draw(c,W,H,t,dt,s,st){const by=H-16,sl=Math.min(.45,s.w/90),osc=Math.min(1,s.r/70),dia=!isDark(nowH());
+if(s.r<35&&dia)sol(c,W*.78,36,15,t,.7);
+const cr=n=>Math.round(255-n*osc);nubeDib(c,W*.5+Math.sin(t*.6)*10,34,46,1,['rgba('+cr(130)+','+cr(120)+','+cr(100)+',.97)','rgba('+cr(120)+','+cr(120)+','+cr(110)+',.9)']);
+c.fillStyle='rgba(180,215,255,.2)';c.beginPath();c.ellipse(W/2,by+4,W*.42,7,0,0,7);c.fill();
+c.strokeStyle='rgba(215,235,255,.9)';c.lineWidth=1.7;c.lineCap='round';c.beginPath();
+for(const d of st.dr){d.y+=d.v*dt;d.x+=d.v*dt*sl;if(d.y>by){if(Math.random()<.5&&st.ri.length<14)st.ri.push({x:d.x,t:0});d.y=64+Math.random()*10;d.x=W*.2+Math.random()*W*.6}c.moveTo(d.x,d.y);c.lineTo(d.x-d.l*sl,d.y-d.l)}c.stroke();
+st.ri=st.ri.filter(o=>o.t<1);for(const o of st.ri){o.t+=dt*1.6;c.strokeStyle='rgba(225,240,255,'+(.75*(1-o.t))+')';c.lineWidth=1.3;c.beginPath();c.ellipse(o.x,by+3,4+o.t*16,1.5+o.t*5,0,0,7);c.stroke()}
+textoGrande(c,s.r+'%',W/2,H*.56,38)}},
+c:{init:(W,H,s)=>({cl:Array.from({length:Math.max(1,Math.round(1+s.c/100*6))},(_,i)=>({x:Math.random()*W,y:34+(i%3)*36+Math.random()*10,r:24+Math.random()*14+s.c*.12,v:6+Math.random()*10,a:.75+Math.random()*.25})),st:Array.from({length:34},()=>({x:Math.random()*W,y:Math.random()*H*.75,p:Math.random()*6}))}),
+draw(c,W,H,t,dt,s,st){const noche=isDark(nowH());if(noche){estrellasDib(c,t,st.st);luna(c,W*.8,36,15)}else sol(c,W*.8,38,15,t,Math.max(.2,1-s.c/100));
+for(const n of st.cl){n.x+=n.v*dt;if(n.x>W+n.r*2)n.x=-n.r*2;nubeDib(c,n.x,n.y+Math.sin(t*.8+n.r)*3,n.r,n.a,noche||s.c>=80?NUBE_OSCURA:NUBE_CLARA)}
+textoGrande(c,s.c+'%',W*.3,H-30,36)}},
+u:{init:(W,H)=>({st:Array.from({length:34},()=>({x:Math.random()*W,y:Math.random()*H*.7,p:Math.random()*6}))}),
+draw(c,W,H,t,dt,s,st){const u=Math.max(0,s.uv),noche=isDark(nowH()),cx=W/2,cy=H-30,R=Math.min(W/2-26,H-70);if(noche)estrellasDib(c,t,st.st);
+c.lineWidth=13;c.lineCap='butt';for(const g of [[0,3,'#4caf50'],[3,6,'#ffd54a'],[6,8,'#ff9800'],[8,11,'#f44336'],[11,12,'#b25bff']]){c.strokeStyle=g[2];c.beginPath();c.arc(cx,cy,R,Math.PI+g[0]/12*Math.PI,Math.PI+g[1]/12*Math.PI);c.stroke()}
+c.fillStyle='rgba(255,255,255,.85)';c.font='600 11px system-ui,sans-serif';c.textAlign='center';c.fillText('0',cx-R,cy+18);c.fillText('11+',cx+R,cy+18);
+const v=Math.min(12,u)*easeEl(t/1.8)+(t>1.8&&u>0?Math.sin(t*2.6)*.12:0),ang=Math.PI+Math.max(0,v)/12*Math.PI,x=cx+R*Math.cos(ang),y=cy+R*Math.sin(ang);
+if(!noche){for(let i=0;i<2;i++){const q=((t*.7+i*.5)%1);c.strokeStyle='rgba(255,236,150,'+(.5*(1-q))+')';c.lineWidth=2;c.beginPath();c.arc(x,y,16+q*30,0,7);c.stroke()}sol(c,x,y,15,t,Math.min(1.2,.3+v/9))}else luna(c,x,y+Math.sin(t*1.3)*3,13);
+textoGrande(c,String(Math.round(Math.max(0,v))),cx,cy-10,52);c.fillStyle='rgba(255,255,255,.9)';c.font='700 12px system-ui,sans-serif';c.fillText('ÍNDICE UV',cx,cy+14)}},
+w:{init:(W,H,s)=>({p:Array.from({length:Math.round(16+s.w*.9)},()=>({x:Math.random()*W,y:Math.random()*H,l:14+Math.random()*28,v:.6+Math.random()*.8})),h:Array.from({length:7},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*6,v:.5+Math.random()*.8,col:['#7cb342','#fbc02d','#ef6c00','#8bc34a'][Math.random()*4|0]}))}),
+draw(c,W,H,t,dt,s,st){const a=(s.dir-90)*Math.PI/180,vx=Math.cos(a),vy=Math.sin(a)*.35,sp=40+s.w*6,raf=1+.25*Math.sin(t*1.7);
+const ajusta=o=>{if(o.x>W+40)o.x=-40;if(o.x<-40)o.x=W+40;if(o.y>H+10)o.y=-10;if(o.y<-10)o.y=H+10};
+c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=1.6;c.lineCap='round';c.beginPath();
+for(const p of st.p){p.x+=vx*sp*raf*p.v*dt;p.y+=vy*sp*raf*p.v*dt+Math.sin(t*2+p.l)*10*dt;ajusta(p);c.moveTo(p.x,p.y);c.lineTo(p.x-vx*p.l,p.y-vy*p.l)}c.stroke();
+const tx=W*.5,ty=H-12,hh=H*.5;c.strokeStyle='rgba(255,255,255,.92)';c.lineWidth=4;c.beginPath();c.moveTo(tx,ty);c.lineTo(tx,ty-hh);c.stroke();
+c.save();c.translate(tx,ty-hh);c.rotate(t*(.8+s.w*.18));c.fillStyle='#fff';for(let i=0;i<3;i++){c.rotate(Math.PI*2/3);c.beginPath();c.moveTo(0,0);c.quadraticCurveTo(6,-hh*.2,0,-hh*.55);c.quadraticCurveTo(-5,-hh*.2,0,0);c.fill()}c.fillStyle='#ffd54a';c.beginPath();c.arc(0,0,4.5,0,7);c.fill();c.restore();
+for(const h of st.h){h.x+=vx*sp*1.1*h.v*dt;h.y+=Math.sin(t*3+h.r*5)*30*dt+vy*sp*h.v*dt;h.r+=dt*(3+s.w*.1);ajusta(h);c.save();c.translate(h.x,h.y);c.rotate(h.r);c.fillStyle=h.col;c.beginPath();c.ellipse(0,0,6,3,0,0,7);c.fill();c.restore()}
+textoGrande(c,s.w+' km/h',W*.2+10,34,26)}},
+h:{init:()=>({b:Array.from({length:9},()=>({x:Math.random(),h:Math.random(),v:.1+Math.random()*.15,r:1.5+Math.random()*2.5}))}),
+draw(c,W,H,t,dt,s,st){const cx=W/2,top=12,bot=H-12,hgt=bot-top,r=hgt*.34,cyc=bot-r,lvl=s.h*easeOut(t/1.6),wy=bot-hgt*lvl/100;
+const gota=()=>{c.beginPath();c.moveTo(cx,top);c.bezierCurveTo(cx+r*.15,top+hgt*.2,cx+r,cyc-r*.9,cx+r,cyc);c.arc(cx,cyc,r,0,Math.PI,false);c.bezierCurveTo(cx-r,cyc-r*.9,cx-r*.15,top+hgt*.2,cx,top);c.closePath()};
+c.save();gota();c.fillStyle='rgba(255,255,255,.12)';c.fill();c.clip();
+for(const q of [[5,.05,2.2,'rgba(110,185,255,.88)'],[4,.065,-1.7,'rgba(60,140,235,.8)']]){c.fillStyle=q[3];c.beginPath();c.moveTo(0,H);for(let x=0;x<=W;x+=6)c.lineTo(x,wy+Math.sin(x*q[1]+t*q[2])*q[0]);c.lineTo(W,H);c.closePath();c.fill()}
+for(const b of st.b){b.h+=b.v*dt;if(b.h>1)b.h=0;const by=bot-(bot-wy)*b.h;c.fillStyle='rgba(255,255,255,.55)';c.beginPath();c.arc(cx+(b.x-.5)*r*1.4+Math.sin(t*2+b.x*9)*3,by,b.r,0,7);c.fill()}
+c.fillStyle='rgba(255,255,255,.25)';c.beginPath();c.ellipse(cx-r*.45,cyc-r*.25,r*.12,r*.35,.4,0,7);c.fill();c.restore();
+gota();c.strokeStyle='rgba(255,255,255,.95)';c.lineWidth=3;c.stroke();
+textoGrande(c,Math.round(lvl)+'%',cx,cyc+12,34)}},
+z:{init:(W,H,s)=>({est:Array.from({length:30},()=>({x:Math.random()*W,y:Math.random()*H*.6,p:Math.random()*6})),n:[{x:W*.3,r:24,v:9},{x:W*.72,r:19,v:6}]}),
+draw(c,W,H,t,dt,s,st){const cx=W/2,base=H-24,R=Math.min(W/2-26,H-82),noche=s.sun===null||(!D&&isDark(nowH())),k=easeOut(t/2.2);
+const hh=nowH(),p=noche?Math.min(1,Math.max(0,((hh+24-18)%24)/12)):s.sun;
+if(noche)estrellasDib(c,t,st.est);
+c.setLineDash([4,6]);c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=2;c.beginPath();c.arc(cx,base,R,Math.PI,2*Math.PI);c.stroke();c.setLineDash([]);
+const pp=p*k,x=cx-R*Math.cos(Math.PI*pp),y=base-R*Math.sin(Math.PI*pp);
+if(noche)luna(c,x,y,13);else sol(c,x,y,14,t,.8);
+if(!noche&&(s.c>=70||rnow()))for(const n of st.n){n.x+=n.v*dt;if(n.x>W+n.r*2)n.x=-n.r*2;nubeDib(c,n.x,y+8,n.r,.88,NUBE_OSCURA)}
+c.fillStyle='rgba(15,30,50,.4)';c.beginPath();c.moveTo(0,H);c.lineTo(0,base+4);for(let x2=0;x2<=W;x2+=8)c.lineTo(x2,base+4-Math.sin(x2*.03)*5-Math.sin(x2*.011)*7);c.lineTo(W,H);c.fill();
+c.fillStyle='rgba(255,255,255,.95)';c.font='700 12px system-ui,sans-serif';c.textAlign='left';c.fillText('🌅 '+(s.sr||'5:41'),10,H-6);c.textAlign='right';c.fillText((s.ss||'17:36')+' 🌇',W-10,H-6);
+c.textAlign='center';c.font='700 13px system-ui,sans-serif';c.fillText(noche?'Noche':'Ya recorrió el '+Math.round(p*100)+' % del día',cx,base-R*.35)}}};
+function iniciarEscena(k,s){const cv=$('dvc'),f=ESC[k];if(!cv||!f)return;const d=Math.min(2,devicePixelRatio||1),W=cv.clientWidth||320,H=cv.clientHeight||200;cv.width=W*d;cv.height=H*d;const c=cv.getContext('2d');
+const st=f.init(W,H,s);let t0=null,ult=0;
+const paso=now=>{if(!document.body.contains(cv)||!$('md').classList.contains('on'))return;if(t0===null)t0=now;const t=(now-t0)/1000,dt=Math.min(.05,Math.max(0,t-ult));ult=t;c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,W,H);
+try{f.draw(c,W,H,t,dt,s,st)}catch(e){console.error('escena '+k,e);return}
+if(!(SAVER||NOANIM))requestAnimationFrame(paso)};
+if(SAVER||NOANIM){c.setTransform(d,0,0,d,0,0);f.draw(c,W,H,2.5,.016,s,st)}else requestAnimationFrame(paso)}
+
 /* Animaciones del cielo en canvas (lluvia, sol, nubes, estrellas, pájaros, rayos). */
 let NOANIM=false,drawing=false;
 const cv=$('fx'),g=cv.getContext('2d');
-let W,H,drops=[[],[],[]],clouds=[],stars=[],birds=[],splash=[],flash=0,tick=0,bolt=null,shoot=null,RAYS=null,CL=null,ff=[];
-function rs(){W=innerWidth;H=innerHeight;const d=Math.min(2,devicePixelRatio||1);cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0)}
+let W,H,DPRc=1,drops=[[],[],[]],clouds=[],stars=[],birds=[],splash=[],flash=0,tick=0,bolt=null,shoot=null,RAYS=null,CL=null,ff=[];
+function rs(){W=innerWidth;H=innerHeight;const d=Math.min(2,devicePixelRatio||1);DPRc=d;cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0)}
 const SKY={wet:false,lvl:0,storm:false,birds:false,night:false};
 function mkCloud(tone,sd){const c=document.createElement('canvas');c.width=300;c.height=140;const x=c.getContext('2d'),base=tone==='dark'?'62,72,88':'255,255,255';
 const B=[[60,92,40],[108,68,52],[168,76,50],[226,94,40],[140,98,50],[88,104,34],[196,104,36]];
@@ -302,8 +384,8 @@ for(let i=0;i<N;i++){const m=i%100,z=m<50?0:m<82?1:2;drops[z].push(nd(z,true))}
 const n=Math.round(s.c/12)+1+(wet?3:0);
 clouds=Array.from({length:n},(_,i)=>{const L=i%3;return{x:Math.random()*W,y:20+Math.random()*H*(L===2?.4:.28),k:[.6+Math.random()*.3,1+Math.random()*.4,1.5+Math.random()*.5][L],v:[.08,.16,.3][L]*(.7+Math.random()*.6),a:[.5,.7,.85][L],i:Math.floor(Math.random()*3),L}}).sort((a,b)=>a.L-b.L);
 stars=Array.from({length:110},(_,i)=>({x:Math.random()*W,y:Math.random()*H*.7,p:Math.random()*6,r:.6+Math.random()*1.5,c:i%7===0?'#fff1c9':i%5===0?'#cfe0ff':'#fff'}));
-birds=[];splash=[];bolt=null;ff=Array.from({length:14},()=>({x:Math.random()*W,y:H*(.4+Math.random()*.55),t:Math.random()*20,p:Math.random()*6}));updateSound();if(SAVER)kick()}
-function sunFX(a){const x=W*.82,y=110;g.save();g.globalAlpha=a;
+birds=[];splash=[];bolt=null;ff=Array.from({length:14},()=>({x:Math.random()*W,y:H*(.4+Math.random()*.55),t:Math.random()*20,p:Math.random()*6}));updateSound();kickCristal();if(SAVER)kick()}
+function sunFX(a){const x=W*.82+INC.x*8,y=110+INC.y*6;g.save();g.globalAlpha=a;
 const pl=1+Math.sin(tick/70)*.04;let gr=g.createRadialGradient(x,y,12,x,y,200*pl);gr.addColorStop(0,'rgba(255,244,180,.9)');gr.addColorStop(.22,'rgba(255,226,120,.4)');gr.addColorStop(1,'rgba(255,226,120,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,200*pl,0,7);g.fill();
 if(!RAYS)RAYS=mkRays();g.translate(x,y);g.rotate(tick/1100);g.drawImage(RAYS,-380,-380);g.rotate(-tick/1100);g.translate(-x,-y);
 gr=g.createRadialGradient(x-8,y-8,4,x,y,40);gr.addColorStop(0,'#fffbe0');gr.addColorStop(.55,'#ffe066');gr.addColorStop(1,'#ffb93b');g.fillStyle=gr;g.beginPath();g.arc(x,y,38,0,7);g.fill();
@@ -312,7 +394,7 @@ g.restore()}
 function nightFX(){stars.forEach(a=>{g.globalAlpha=.25+.75*Math.abs(Math.sin(tick/50+a.p));g.fillStyle=a.c;g.beginPath();g.arc(a.x,a.y,a.r,0,7);g.fill()});g.globalAlpha=1;
 if(!shoot&&Math.random()<.002)shoot={x:W*(.3+Math.random()*.6),y:20+Math.random()*H*.2,vx:-9-Math.random()*4,vy:4+Math.random()*2,t:0};
 if(shoot){shoot.x+=shoot.vx;shoot.y+=shoot.vy;shoot.t++;const al=Math.max(0,1-shoot.t/38),gr=g.createLinearGradient(shoot.x,shoot.y,shoot.x-shoot.vx*6,shoot.y-shoot.vy*6);gr.addColorStop(0,'rgba(255,255,255,'+al+')');gr.addColorStop(1,'rgba(255,255,255,0)');g.strokeStyle=gr;g.lineWidth=2;g.beginPath();g.moveTo(shoot.x,shoot.y);g.lineTo(shoot.x-shoot.vx*6,shoot.y-shoot.vy*6);g.stroke();if(shoot.t>38)shoot=null}
-const mx=W*.82,my=100;let gr=g.createRadialGradient(mx,my,20,mx,my,120);gr.addColorStop(0,'rgba(225,232,255,.4)');gr.addColorStop(1,'rgba(225,232,255,0)');g.fillStyle=gr;g.beginPath();g.arc(mx,my,120,0,7);g.fill();
+const mx=W*.82+INC.x*8,my=100+INC.y*6;let gr=g.createRadialGradient(mx,my,20,mx,my,120);gr.addColorStop(0,'rgba(225,232,255,.4)');gr.addColorStop(1,'rgba(225,232,255,0)');g.fillStyle=gr;g.beginPath();g.arc(mx,my,120,0,7);g.fill();
 gr=g.createRadialGradient(mx-8,my-8,4,mx,my,32);gr.addColorStop(0,'#fffdf0');gr.addColorStop(1,'#e3dfc0');g.fillStyle=gr;g.beginPath();g.arc(mx,my,30,0,7);g.fill();
 g.fillStyle='rgba(150,148,125,.28)';[[-9,-6,6],[8,4,8],[-2,13,4],[11,-11,3.5]].forEach(c=>{g.beginPath();g.arc(mx+c[0],my+c[1],c[2],0,7);g.fill()})}
 function spawnBird(){const dir=Math.random()<.5?1:-1;birds.push({x:dir>0?-30:W+30,y:H*(.1+Math.random()*.3),v:dir*(.8+Math.random()*1.1),s:7+Math.random()*7,p:Math.random()*6,b:Math.random()*6,a:10+Math.random()*14});chirp(dir>0?-.6:.6,.07)}
@@ -320,25 +402,31 @@ function birdFX(){birds=birds.filter(b=>b.x>-60&&b.x<W+60);birds.forEach(b=>{b.x
 function makeBolt(){const pts=[];let x=W*(.2+Math.random()*.6),y=0;pts.push([x,y]);while(y<H*.55){y+=18+Math.random()*28;x+=(Math.random()-.5)*50;pts.push([x,y])}
 const br=[];for(let i=3;i<pts.length-1;i+=3){if(Math.random()<.6){let bx=pts[i][0],by=pts[i][1];const q=[[bx,by]];for(let k=0;k<4;k++){bx+=(Math.random()-.3)*30*(Math.random()<.5?-1:1);by+=14+Math.random()*18;q.push([bx,by])}br.push(q)}}
 return{pts,br,life:10}}
-function boltFX(){if(!bolt)return;bolt.life--;if(bolt.life<=0){bolt=null;return}if(bolt.life%4===1)return;g.save();g.shadowColor='rgba(190,210,255,.95)';g.shadowBlur=20;g.lineJoin='round';
+function boltFX(){if(!bolt)return;bolt.life--;if(bolt.life<=0){bolt=null;return}if(bolt.life%4===1)return;g.save();{const bg=g.createRadialGradient(bolt.pts[0][0],0,4,bolt.pts[0][0],0,200);bg.addColorStop(0,'rgba(200,215,255,.45)');bg.addColorStop(1,'rgba(200,215,255,0)');g.fillStyle=bg;g.fillRect(0,0,W,280)}g.shadowColor='rgba(190,210,255,.95)';g.shadowBlur=20;g.lineJoin='round';
 const path=p=>{g.beginPath();p.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke()};
 g.strokeStyle='rgba(255,255,255,.95)';g.lineWidth=2.4;path(bolt.pts);g.strokeStyle='rgba(215,228,255,.7)';g.lineWidth=1.2;bolt.br.forEach(path);g.restore()}
-function draw(){tick++;g.clearRect(0,0,W,H);const s=cs(),wet=cur==='rain'||cur==='storm',st=cur==='storm',night=cur==='night';
+function draw(){tick++;g.setTransform(DPRc,0,0,DPRc,0,0);g.clearRect(0,0,W,H);const s=cs(),wet=cur==='rain'||cur==='storm',st=cur==='storm',night=cur==='night',gk=1+(Math.sin(tick/140)*.3+Math.sin(tick/53+1)*.18)*Math.min(1,.3+s.w/30);
 if(night)nightFX();else if(cur==='sun'||cur==='cloud')sunFX(cur==='sun'?1:.55);
 const sp=(wet||night)?CL.dark:CL.light,ca=night?.45:(document.documentElement.classList.contains('dk')?.55:1);
-clouds.forEach(c=>{c.x+=c.v;if(c.x>W+40)c.x=-300*c.k;g.globalAlpha=c.a*ca;g.drawImage(sp[c.i],c.x,c.y,300*c.k,140*c.k)});g.globalAlpha=1;
+clouds.forEach(c=>{c.x+=c.v*gk;if(c.x>W+40)c.x=-300*c.k;g.globalAlpha=c.a*ca;g.drawImage(sp[c.i],c.x+INC.x*10*(c.L+1),c.y+INC.y*5*(c.L+1),300*c.k,140*c.k)});
+if(flash>0&&CL){g.save();g.globalCompositeOperation='lighter';clouds.forEach(c=>{g.globalAlpha=Math.min(.5,flash*.55)*c.a;g.drawImage(CL.light[c.i],c.x+INC.x*10*(c.L+1),c.y+INC.y*5*(c.L+1),300*c.k,140*c.k)});g.restore()}g.globalAlpha=1;
 if(SKY.birds&&birds.length<3&&Math.random()<.0035)spawnBird();birdFX();if(SKY.night)flyFX();
-if(wet){const wx=-(.7+s.w*.045)*(st?1.5:1),LS=[['rgba(195,215,240,.3)',.8],['rgba(210,228,250,.45)',1.2],['rgba(228,240,255,.65)',1.8]];
+if(wet){const wx=-(.7+s.w*.045)*(st?1.5:1)*gk,LS=[['rgba(195,215,240,.3)',.8],['rgba(210,228,250,.45)',1.2],['rgba(228,240,255,.65)',1.8]];
 drops.forEach((arr,z)=>{g.strokeStyle=LS[z][0];g.lineWidth=LS[z][1];g.beginPath();arr.forEach(d=>{d.y+=d.v;d.x+=wx;if(d.y>H){if(z>0&&splash.length<50&&Math.random()<.5)splash.push({x:d.x,y:H-6-Math.random()*10,t:0});d.y=-d.l;d.x=Math.random()*(W+160)}else if(d.x<-30)d.x+=W+160;g.moveTo(d.x,d.y);g.lineTo(d.x-wx*d.l/d.v,d.y-d.l)});g.stroke()});
 g.lineWidth=1;splash=splash.filter(p=>p.t<12);splash.forEach(p=>{p.t++;g.strokeStyle='rgba(225,238,255,'+(.55*(1-p.t/12))+')';g.beginPath();g.ellipse(p.x,p.y,2+p.t*.9,(2+p.t*.9)*.33,0,0,7);g.stroke()});
 const mg2=g.createLinearGradient(0,H-160,0,H);mg2.addColorStop(0,'rgba(190,210,230,0)');mg2.addColorStop(1,'rgba(190,210,230,.2)');g.fillStyle=mg2;g.fillRect(0,H-160,W,160)}
-if(st){if(Math.random()<.006){flash=1;bolt=makeBolt();thunder(.4+Math.random()*2.2)}boltFX();if(flash>0){g.fillStyle='rgba(255,255,255,'+flash*.42+')';g.fillRect(0,0,W,H);flash-=.06}}
+if(st){if(Math.random()<.006){flash=1;bolt=makeBolt();const dT=.4+Math.random()*2.2;thunder(dT);vibrarTrueno(dT)}boltFX();if(flash>0){g.fillStyle='rgba(255,255,255,'+flash*.42+')';g.fillRect(0,0,W,H);flash-=.06}}
 if(SAVER||NOANIM){drawing=false;return}requestAnimationFrame(draw)}
+function vibrarTrueno(d){if(!AJ.vibrar||SAVER||!navigator.vibrate)return;setTimeout(()=>{if(cur==='storm'&&!document.hidden)try{navigator.vibrate([40,40,90,40,60])}catch(e){}},d*1000)}
 function kick(){if(drawing)return;drawing=true;draw()}
 function flyFX(){ff.forEach((f,i)=>{f.t+=.012;const x=f.x+Math.sin(f.t*1.3+i)*40,y=f.y+Math.cos(f.t+i*2)*24,a=Math.pow(Math.max(0,Math.sin(f.t*2.1+f.p)),2);if(a<.02)return;g.fillStyle='rgba(215,255,120,'+(a*.28)+')';g.beginPath();g.arc(x,y,9,0,7);g.fill();g.fillStyle='rgba(240,255,170,'+a+')';g.beginPath();g.arc(x,y,2.2,0,7);g.fill()})}
+function reiniciarCanvas(){rs();if(!drawing)kick()}
 function iniciarCanvas(){
 addEventListener('resize',rs);
 rs();
+cv.addEventListener('contextrestored',reiniciarCanvas);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)reiniciarCanvas()});
+addEventListener('pageshow',e=>{if(e.persisted)reiniciarCanvas()});
 }
 function arrancarAnimacion(){
 const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -346,14 +434,42 @@ NOANIM=RM;
 if(!RM){drawing=true;draw()}else{tick=0;g.clearRect(0,0,W,H)}
 }
 
+/* Gotas de lluvia en el cristal: capa transparente por encima de la pantalla (no estorba los toques). */
+let GL=null,GW=0,GH=0,GD=1,gotas=[],gDrawing=false,gUlt=0,gFade=1;
+function iniciarCristal(){const cv=$('glass');if(!cv)return;GL=cv.getContext('2d');rsCristal();addEventListener('resize',rsCristal)}
+function rsCristal(){const cv=$('glass');if(!cv)return;GD=Math.min(2,devicePixelRatio||1);GW=innerWidth;GH=innerHeight;cv.width=GW*GD;cv.height=GH*GD}
+function cristalActivo(){return AJ.gotas&&!SAVER&&!NOANIM&&(cur==='rain'||cur==='storm')}
+function kickCristal(){if(GL&&!gDrawing){gDrawing=true;gUlt=performance.now();requestAnimationFrame(cristalPaso)}}
+function cristalPaso(now){const activo=cristalActivo();GL.setTransform(GD,0,0,GD,0,0);GL.clearRect(0,0,GW,GH);
+if(!activo&&!gotas.length){gDrawing=false;return}
+const dt=Math.min(.05,Math.max(.001,(now-gUlt)/1000));gUlt=now;gFade=activo?Math.min(1,gFade+dt*1.2):Math.max(0,gFade-dt*.8);
+if(!activo&&gFade<=0){gotas=[];gDrawing=false;return}
+if(activo&&gotas.length<(cur==='storm'?36:28)&&Math.random()<.18)gotas.push({x:Math.random()*GW,y:Math.random()*GH*.92,r:1.5+Math.random()*2.6,vy:0,t:0,tope:5+Math.random()*3.5,tr:[]});
+for(const g of gotas){g.t+=dt;if(!g.vy){g.r+=dt*(.35+Math.random()*.5);if(g.r>g.tope)g.vy=45+Math.random()*50}else{g.vy*=1+dt*.5;g.y+=g.vy*dt;g.r=Math.max(1.2,g.r-dt*.6);g.tr.push([g.x,g.y]);if(g.tr.length>26)g.tr.shift()}}
+gotas=gotas.filter(g=>g.y<GH+12&&(g.vy||g.t<40));
+GL.save();GL.globalAlpha=gFade;
+for(const g of gotas){if(g.tr.length>1){GL.strokeStyle='rgba(220,235,255,.17)';GL.lineWidth=g.r*.7;GL.lineCap='round';GL.beginPath();GL.moveTo(g.tr[0][0],g.tr[0][1]);for(const q of g.tr)GL.lineTo(q[0],q[1]);GL.stroke()}
+const gr=GL.createRadialGradient(g.x-g.r*.3,g.y-g.r*.35,g.r*.1,g.x,g.y,g.r*1.1);gr.addColorStop(0,'rgba(255,255,255,.55)');gr.addColorStop(.45,'rgba(200,225,255,.16)');gr.addColorStop(1,'rgba(20,40,70,.3)');
+GL.fillStyle=gr;GL.beginPath();GL.ellipse(g.x,g.y,g.r*.9,g.r*1.15,0,0,7);GL.fill();GL.fillStyle='rgba(255,255,255,.8)';GL.beginPath();GL.arc(g.x-g.r*.3,g.y-g.r*.4,g.r*.22,0,7);GL.fill()}
+GL.restore();requestAnimationFrame(cristalPaso)}
+
+/* Efecto 3D: el gato, el cielo y la temperatura se desplazan un poco al inclinar el celular. */
+let INC={x:0,y:0,tx:0,ty:0,vivo:false};
+function inclinarActivo(){return AJ.inclinar&&!SAVER&&!NOANIM}
+function pasoInclinar(){const r=document.documentElement.style;
+if(inclinarActivo()){INC.x+=(INC.tx-INC.x)*.08;INC.y+=(INC.ty-INC.y)*.08}else{INC.x*=.9;INC.y*=.9}
+r.setProperty('--ix',INC.x.toFixed(3));r.setProperty('--iy',INC.y.toFixed(3));requestAnimationFrame(pasoInclinar)}
+function iniciarInclinar(){if(!('DeviceOrientationEvent' in window))return;
+addEventListener('deviceorientation',e=>{if(e.gamma==null||e.beta==null)return;INC.tx=Math.max(-1,Math.min(1,e.gamma/30));INC.ty=Math.max(-1,Math.min(1,(e.beta-55)/30));if(!INC.vivo){INC.vivo=true;requestAnimationFrame(pasoInclinar)}})}
+
 /* Sonido generado con Web Audio (lluvia, truenos, pájaros, grillos, ranas, búho). */
-let ac=null,mg,rainG,patG,dropB,thB,birdBus,nightBus,RL=0,want=false;
+let ac=null,mg,rainG,patG,dropB,thB,crackB,birdBus,nightBus,RL=0,want=false;
 function noiseBuf(sec,brown){const n=Math.floor(ac.sampleRate*sec),b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){const w=Math.random()*2-1;if(brown){l=(l+.02*w)/1.02;d[i]=l*3.5}else d[i]=w}return b}
 function initAudio(){if(ac)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;ac=new AC();mg=ac.createGain();mg.gain.value=0;mg.connect(ac.destination);birdBus=ac.createGain();birdBus.gain.value=0;birdBus.connect(mg);nightBus=ac.createGain();nightBus.gain.value=0;nightBus.connect(mg);
 const wb=noiseBuf(3,false);const mk=(f1,f2)=>{const s=ac.createBufferSource();s.buffer=wb;s.loop=true;const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=f1;const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=f2;const gn=ac.createGain();gn.gain.value=0;s.connect(hp);hp.connect(lp);lp.connect(gn);gn.connect(mg);s.start(0,Math.random()*2);return gn};
 rainG=mk(500,9000);patG=mk(1800,3800);
 dropB=noiseBuf(.04,false);{const d=dropB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]*=Math.pow(1-i/d.length,3)}
-thB=noiseBuf(6,true);patLoop();birdLoop();nightInit();updateSound()}
+thB=noiseBuf(6,true);crackB=noiseBuf(.35,false);{const cd=crackB.getChannelData(0);for(let i=0;i<cd.length;i++)cd[i]*=Math.pow(1-i/cd.length,2.5)}patLoop();truenoLejano();birdLoop();nightInit();updateSound()}
 function dropSound(){const s=ac.createBufferSource();s.buffer=dropB;s.playbackRate.value=.7+Math.random()*1.5;const bp=ac.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1800+Math.random()*4200;bp.Q.value=1.5;const gn=ac.createGain();gn.gain.value=(.04+Math.random()*.08)*RL;s.connect(bp);bp.connect(gn);gn.connect(mg);s.start()}
 function patLoop(){RL+=((AJ.sRain?SKY.lvl:0)-RL)*.1;if(ac&&want&&ac.state==='running'&&RL>.02)dropSound();setTimeout(patLoop,50+Math.random()*(220-170*RL))}
 function chirp(pan,vol){if(!AJ.sBirds||!ac||!want||ac.state!=='running')return;const t0=ac.currentTime+.02,trill=Math.random()<.35,base=2400+Math.random()*2200,pn=ac.createStereoPanner?ac.createStereoPanner():null;if(pn){pn.pan.value=pan;pn.connect(birdBus)}const out=pn||birdBus,n=trill?1:2+Math.floor(Math.random()*4);let t=t0;
@@ -362,9 +478,14 @@ o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*(1.25
 if(trill){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=18+Math.random()*10;lg.gain.value=f*.07;l.connect(lg);lg.connect(o.frequency);l.start(t);l.stop(t+d+.05)}
 gn.gain.setValueAtTime(.0001,t);gn.gain.exponentialRampToValueAtTime(vol,t+.012);gn.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(gn);gn.connect(out);o.start(t);o.stop(t+d+.05);t+=d+.05+Math.random()*.06}}
 function birdLoop(){if(SKY.birds)chirp(Math.random()*2-1,.05+Math.random()*.05);setTimeout(birdLoop,1500+Math.random()*5500)}
-function thunder(d){if(!ac||!want||ac.state!=='running'||!SKY.storm||!AJ.sRain)return;const t=ac.currentTime+d,s=ac.createBufferSource();s.buffer=thB;const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.setValueAtTime(260,t);lp.frequency.exponentialRampToValueAtTime(70,t+2.8);
-const gn=ac.createGain(),pk=.7/(1+d*.4);gn.gain.setValueAtTime(.0001,t);gn.gain.exponentialRampToValueAtTime(pk,t+.08);gn.gain.exponentialRampToValueAtTime(pk*.3,t+.9);gn.gain.exponentialRampToValueAtTime(.0001,t+3.4);s.connect(lp);lp.connect(gn);gn.connect(mg);s.start(t,Math.random()*3);s.stop(t+3.6)}
+function thunder(d,k){if(!ac||!want||ac.state!=='running'||!AJ.sRain)return;k=k||1;const t=ac.currentTime+d,pk=Math.min(1,.95*k/(1+d*.25))*.5;
+const c=ac.createBufferSource();c.buffer=crackB;const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=700;const cg=ac.createGain();cg.gain.value=.55*pk;c.connect(hp);hp.connect(cg);cg.connect(mg);c.start(t);
+const s=ac.createBufferSource();s.buffer=thB;const lp=ac.createBiquadFilter();lp.type='lowpass';lp.Q.value=.7;lp.frequency.setValueAtTime(1600,t);lp.frequency.exponentialRampToValueAtTime(130,t+3.6);
+const pe=ac.createBiquadFilter();pe.type='peaking';pe.frequency.value=320;pe.Q.value=.8;pe.gain.value=11;
+const gn=ac.createGain(),ga=gn.gain;ga.setValueAtTime(.0001,t+.04);ga.exponentialRampToValueAtTime(pk,t+.12);ga.exponentialRampToValueAtTime(pk*.4,t+.55);ga.exponentialRampToValueAtTime(pk*.85,t+.95);ga.exponentialRampToValueAtTime(pk*.3,t+1.7);ga.exponentialRampToValueAtTime(pk*.5,t+2.3);ga.exponentialRampToValueAtTime(.0001,t+4.6);
+s.connect(lp);lp.connect(pe);pe.connect(gn);gn.connect(mg);s.start(t+.04,Math.random()*1.5);s.stop(t+4.8)}
 let CR=[],nextFrog=0,nextOwl=0;
+function truenoLejano(){if(ac&&want&&ac.state==='running'&&AJ.sRain&&cur==='rain'&&cs().r>=75)thunder(1+Math.random()*3,.5);setTimeout(truenoLejano,22000+Math.random()*40000)}
 function nightInit(){[[4300,-.7,.55],[4750,-.2,.7],[5150,.35,.5],[4050,.8,.62]].forEach(c=>{const o=ac.createOscillator(),gn=ac.createGain(),pn=ac.createStereoPanner?ac.createStereoPanner():null;o.type='sine';o.frequency.value=c[0];gn.gain.value=0;o.connect(gn);if(pn){pn.pan.value=c[1];gn.connect(pn);pn.connect(nightBus)}else gn.connect(nightBus);o.start();CR.push({g:gn.gain,n:0,r:c[2]})});
 nextFrog=ac.currentTime+2;nextOwl=ac.currentTime+20+Math.random()*30;setInterval(nightTick,500)}
 function nightTick(){if(!ac||!want||ac.state!=='running')return;const t=ac.currentTime,v=((SKY.night&&AJ.sNight)||nightBus.gain.value>.02)?.13:0;
@@ -382,14 +503,23 @@ SKY.wet=wet;SKY.storm=cur==='storm';SKY.lvl=wet?(cur==='storm'?1:Math.min(1,.35+
 SKY.night=!wet&&isDark(h);
 SKY.birds=!wet&&cur!=='night'&&cur!=='cold'&&!isDark(h)&&h>=5&&h<18&&s.t>=24;
 if(ac){const t=ac.currentTime;const rl=AJ.sRain?SKY.lvl:0;rainG.gain.setTargetAtTime(rl*.2,t,1.6);patG.gain.setTargetAtTime(rl*.1,t,1.6);birdBus.gain.setTargetAtTime(SKY.birds&&AJ.sBirds?1:0,t,1.8);nightBus.gain.setTargetAtTime(SKY.night&&AJ.sNight?1:0,t,2.2)}}
-function aplicarVolumen(){if(ac&&want)mg.gain.setTargetAtTime(AJ.volumen/100,ac.currentTime,.2)}
-function setSnd(on){if(on&&SAVER){toast('🔋 El modo ahorro mantiene el sonido apagado');return}want=on;if(on){initAudio();if(ac&&ac.resume)ac.resume()}if(ac)mg.gain.setTargetAtTime(on?AJ.volumen/100:0,ac.currentTime,.5);
+function volMaestro(){const md=$('md'),abierto=md&&md.classList.contains('on')&&!$('ajw');return AJ.volumen/100*(abierto?.45:1)}
+function aplicarVolumen(){if(ac&&want)mg.gain.setTargetAtTime(volMaestro(),ac.currentTime,.3)}
+function setSnd(on){if(on&&SAVER){toast('🔋 El modo ahorro mantiene el sonido apagado');return}want=on;if(on){initAudio();if(ac&&ac.resume)ac.resume()}if(ac)mg.gain.setTargetAtTime(on?volMaestro():0,ac.currentTime,.5);
 const b=$('sndbtn');b.textContent=on?'🔊 Sonido':'🔇 Sonido';b.setAttribute('aria-pressed',on);b.setAttribute('aria-label',on?'Apagar sonido':'Activar sonido');
 updateSound();toast(!on?'🔇 Sonido apagado':SKY.lvl>0?'🔊 Sonido de lluvia activado':SKY.birds?'🔊 Se oyen pájaros: hace calor y es de día':SKY.night?'🔊 Se oyen grillos y ranas: es de noche':'🔊 Activado: suena con lluvia, y con pájaros en días cálidos')}
 function iniciarSonido(){
 $('sndbtn').onclick=()=>setSnd(!want);
 document.addEventListener('visibilitychange',()=>{if(!ac)return;if(document.hidden)ac.suspend();else if(want)ac.resume()});
+try{const mo=new MutationObserver(()=>aplicarVolumen());mo.observe($('md'),{attributes:true,attributeFilter:['class']});mo.observe($('mb'),{childList:true})}catch(e){}
 }
+
+function miau(){if(!AJ.sGato||!ac||!want||ac.state!=='running')return;const t=ac.currentTime,o=ac.createOscillator(),lf=ac.createOscillator(),lg=ac.createGain(),f=ac.createBiquadFilter(),gn=ac.createGain();
+o.type='sawtooth';o.frequency.setValueAtTime(480,t);o.frequency.linearRampToValueAtTime(900,t+.14);o.frequency.exponentialRampToValueAtTime(430,t+.6);
+lf.frequency.value=7;lg.gain.value=14;lf.connect(lg);lg.connect(o.frequency);
+f.type='bandpass';f.Q.value=3.2;f.frequency.setValueAtTime(900,t);f.frequency.linearRampToValueAtTime(2000,t+.16);f.frequency.exponentialRampToValueAtTime(750,t+.55);
+gn.gain.setValueAtTime(.0001,t);gn.gain.exponentialRampToValueAtTime(.5,t+.06);gn.gain.exponentialRampToValueAtTime(.0001,t+.65);
+o.connect(f);f.connect(gn);gn.connect(mg);lf.start(t);o.start(t);o.stop(t+.7);lf.stop(t+.7)}
 
 /* Radar de lluvia (RainViewer + OpenStreetMap). */
 let RV=null;
@@ -481,16 +611,67 @@ if(a.status==='fulfilled'){const j=a.value,c=j.current||{},h=j.hourly||{},T=h.ti
 if(c.us_aqi!=null)D.aq={us:Math.round(c.us_aqi),p25:c.pm2_5,p10:c.pm10,max:nx.length?Math.round(Math.max(...nx)):Math.round(c.us_aqi)}}
 if(m.status==='fulfilled'){const arr=Array.isArray(m.value)?m.value:[m.value];D.mar=null;
 for(let k=0;k<arr.length;k++){const h=arr[k]&&arr[k].hourly;if(h&&h.wave_height&&h.wave_height.some(v=>v!=null)){const i=D.h24?D.h24.hh[0]:new Date().getHours(),sl=q=>(q||[]).slice(i,i+24),wh=sl(h.wave_height);if(wh[0]==null)continue;
-D.mar={km:Math.round(ds[k]*111),h:wh.map(v=>v==null?0:+(+v).toFixed(1)),p:sl(h.wave_period)[0],dir:sl(h.wave_direction)[0],sst:sl(h.sea_surface_temperature)[0]};break}}}
+D.mar={lat:+(lat-ds[k]).toFixed(3),lon:+(+lon).toFixed(3),km:Math.round(ds[k]*111),h:wh.map(v=>v==null?0:+(+v).toFixed(1)),p:sl(h.wave_period)[0],dir:sl(h.wave_direction)[0],sst:sl(h.sea_surface_temperature)[0]};break}}}
 EX={key:KEY,aq:D.aq,mar:D.mar};
 try{const o=JSON.parse(localStorage.getItem(KEY));if(o){o.D=D;localStorage.setItem(KEY,JSON.stringify(o))}}catch(e){}
-drawExtras();const al=$('g').querySelector('.card.wide');if(al&&/Avisos/.test(al.textContent))al.outerHTML=alertsHTML(cs())})}
+drawExtras();cargarMarExtra(mine,KEY);const al=$('g').querySelector('.card.wide');if(al&&/Avisos/.test(al.textContent))al.outerHTML=alertsHTML(cs())})}
+function cargarMarExtra(mine,KEY){const m=D&&D.mar;if(!m||m.lat==null)return;
+fetch('https://marine-api.open-meteo.com/v1/marine?latitude='+m.lat+'&longitude='+m.lon+'&hourly=wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction,ocean_current_velocity,sea_level_height_msl&timezone=auto&forecast_days=2').then(r=>r.ok?r.json():null).then(j=>{if(!j||!j.hourly||D!==mine||!D.mar)return;
+const h=j.hourly,i=D.h24?D.h24.hh[0]:new Date().getHours(),sl=q=>(q||[]).slice(i,i+24),num=a=>a.map(v=>v==null?null:+(+v).toFixed(2)),ok=a=>a.some(v=>v!=null),ol=num(sl(h.wind_wave_height)),sw=num(sl(h.swell_wave_height)),nm=num(sl(h.sea_level_height_msl)),cv=sl(h.ocean_current_velocity)[0];
+if(ok(ol))D.mar.ol=ol;if(ok(sw)){D.mar.sw=sw;D.mar.swp=sl(h.swell_wave_period)[0];D.mar.swd=sl(h.swell_wave_direction)[0]}if(ok(nm))D.mar.nm=nm;if(cv!=null)D.mar.cv=+(+cv).toFixed(1);
+EX.mar=D.mar;try{const o=JSON.parse(localStorage.getItem(KEY));if(o){o.D=D;localStorage.setItem(KEY,JSON.stringify(o))}}catch(e){}drawExtras()}).catch(()=>{})}
 function aqHTML(a){const L=[[50,'Buena','#7be07f','Aire limpio: disfruta las actividades al aire libre.'],[100,'Moderada','#ffd54a','Aceptable. Las personas muy sensibles podrían notar molestias.'],[150,'Dañina para personas sensibles','#ffab40','Niños, adultos mayores y personas con asma o problemas del corazón: reduzcan el esfuerzo al aire libre.'],[200,'Dañina','#ff7961','Reduce el ejercicio al aire libre y usa mascarilla si hay humo.'],[300,'Muy dañina','#d58bff','Evita salir y el ejercicio al aire libre.'],[1e9,'Peligrosa','#ff6b8b','Quédate en interiores con puertas y ventanas cerradas.']],f=v=>L.find(x=>v<=x[0]),c=f(a.us),m=f(a.max);
 return '<h2>🌫️ Calidad del aire</h2><div class="aq"><b class="aqn" style="color:'+c[2]+'">'+a.us+'</b><div><b>'+c[1]+'</b><small>'+c[3]+'</small></div></div><div class="aqb"><i style="left:'+Math.min(100,a.us/300*100)+'%"></i></div><div class="aqk">'+(a.p25!=null?'<span>PM2.5: '+Math.round(a.p25)+' µg/m³</span>':'')+(a.p10!=null?'<span>PM10: '+Math.round(a.p10)+'</span>':'')+'<span>Máx. próx. 24 h: '+a.max+(m!==c?' ('+m[1]+')':'')+'</span></div><p class="note">Estimación de modelo (CAMS/Copernicus), no de estaciones locales. Índice AQI de EE. UU.</p>'}
-function marHTML(m){const mx=Math.max(...m.h),w=m.h[0],lv=w<.5?['tranquilo','Mar en calma.']:w<1.25?['moderado','Oleaje normal para la costa.']:w<2.5?['fuerte','Cuidado con las corrientes de resaca. Báñate solo en zonas con salvavidas.']:['muy fuerte','Evita entrar al mar y mantente lejos de rocas y espigones.'],dr=['N','NE','E','SE','S','SO','O','NO'][Math.round((m.dir||0)/45)%8],top=Math.max(mx,1);
-return '<h2>🌊 Mar y olas</h2><div class="aq"><b class="aqn">'+w.toFixed(1)+' m</b><div><b>Oleaje '+lv[0]+'</b><small>'+lv[1]+'</small></div></div><div class="aqk">'+(m.p!=null?'<span>Periodo: '+Math.round(m.p)+' s</span>':'')+(m.dir!=null?'<span>Viene del '+dr+'</span>':'')+(m.sst!=null?'<span>Agua: '+Math.round(m.sst)+'°</span>':'')+'<span>Máx. próx. 24 h: '+mx.toFixed(1)+' m</span></div><div class="wb" aria-hidden="true">'+m.h.map(v=>'<i style="height:'+Math.max(4,Math.round(v/top*38))+'px"></i>').join('')+'</div><p class="note">'+(m.km>0?'Datos del mar a unos '+m.km+' km de tu ubicación, hacia el sur. ':'')+'Oleaje: DWD vía Open-Meteo. Es un pronóstico general; las condiciones en cada playa varían.</p>'}
-function drawExtras(){const s=cs(),aq=s.aq||(isDemo()?{us:42,p25:9,p10:18,max:61}:null),mr=s.mar||(isDemo()?{km:0,h:Array.from({length:24},(_,i)=>+(1.2+.5*Math.sin(i/4)).toFixed(1)),p:9,dir:200,sst:29}:null),A=$('aqc'),M=$('marc');
-if(A){A.hidden=!aq;if(aq)A.innerHTML=aqHTML(aq)}if(M){M.hidden=!mr;if(mr)M.innerHTML=marHTML(mr)}}
+function drawExtras(){const s=cs(),aq=s.aq||(isDemo()?{us:42,p25:9,p10:18,max:61}:null),mr=s.mar||(isDemo()?{km:0,h:Array.from({length:24},(_,i)=>+(1.2+.5*Math.sin(i/4)).toFixed(1)),p:9,dir:200,sst:29,swp:12,swd:205,cv:.6,sw:Array.from({length:24},(_,i)=>+(1+.4*Math.sin(i/5)).toFixed(1)),ol:Array.from({length:24},(_,i)=>+(.4+.2*Math.sin(i/3)).toFixed(1)),nm:Array.from({length:24},(_,i)=>+(.8*Math.sin((i+2)/12.4*6.283)).toFixed(2))}:null),A=$('aqc'),M=$('marc');
+if(A){A.hidden=!aq;if(aq)A.innerHTML=aqHTML(aq)}if(M){M.hidden=!mr;if(mr){M.innerHTML=marHTML(mr);iniciarMarAnim(mr)}}}
+
+/* Mar y olas: tarjeta con escena animada, bandera de seguridad, mareas y detalles. */
+const PUNTOS=['N','NE','E','SE','S','SO','O','NO'],FLECHAS=['↑','↗','→','↘','↓','↙','←','↖'];
+function compasTxt(d){return PUNTOS[Math.round((((d%360)+360)%360)/45)%8]}
+function flechaHacia(d){return FLECHAS[Math.round(((d+180)%360)/45)%8]}
+function marNivel(w){return w<.5?{n:'tranquilo',b:'verde',col:'#2ecc71',t:'Mar en calma. Aun así, báñate con la precaución de siempre.'}:w<1?{n:'suave',b:'verde',col:'#2ecc71',t:'Oleaje suave. Báñate cerca de la orilla y atento a las corrientes.'}:w<1.75?{n:'moderado',b:'amarilla',col:'#f1c40f',t:'Oleaje moderado: precaución. Báñate solo en zonas con salvavidas y no te alejes de la orilla.'}:w<2.5?{n:'fuerte',b:'roja',col:'#e74c3c',t:'Oleaje fuerte: evita entrar al mar. Cuidado con las corrientes de resaca y las rocas.'}:{n:'muy fuerte',b:'roja',col:'#e74c3c',t:'Oleaje muy fuerte: no entres al mar y mantente lejos de rocas y espigones.'}}
+function marMejor(m,H){const n=Math.min(m.h.length,H.hh.length);let mj=null;for(let i=0;i+2<n;i++){if(H.hh[i]<6||H.hh[i+2]>17||H.hh[i+2]<H.hh[i])continue;const v=(m.h[i]+m.h[i+1]+m.h[i+2])/3;if(!mj||v<mj.v)mj={i,v}}return mj?{ini:H.hh[mj.i],fin:H.hh[mj.i+2]+1,v:mj.v,i:mj.i}:null}
+function marMarea(m,H){const a=m.nm;if(!a||a.length<4||a[0]==null||a[1]==null)return null;const sube=a[1]>a[0];for(let i=1;i<a.length-1;i++){const p=a[i-1],q=a[i],r=a[i+1];if(p==null||q==null||r==null)continue;if(sube&&q>=p&&q>r)return{sube,alta:true,hora:H.hh[i]};if(!sube&&q<=p&&q<r)return{sube,alta:false,hora:H.hh[i]}}return{sube,hora:null}}
+function marGrafica(m,H,mj){const n=Math.min(m.h.length,H.hh.length),W=300,Hh=92,top=Math.max(Math.max(...m.h),1.2),x=i=>6+i*(W-12)/(n-1),y=v=>Hh-22-(Hh-40)*v/top;
+let p='M'+x(0)+' '+y(m.h[0]);for(let i=1;i<n;i++){const mx=(x(i-1)+x(i))/2;p+=' C'+mx+' '+y(m.h[i-1])+' '+mx+' '+y(m.h[i])+' '+x(i)+' '+y(m.h[i])}
+let sv='<svg viewBox="0 0 '+W+' '+Hh+'" class="mgraf" role="img" aria-label="Altura de las olas en las próximas 24 horas">';
+if(mj)sv+='<rect x="'+x(mj.i)+'" y="6" width="'+(x(Math.min(n-1,mj.i+2))-x(mj.i))+'" height="'+(Hh-28)+'" rx="6" fill="rgba(76,175,80,.38)"/>';
+sv+='<path d="'+p+' L'+x(n-1)+' '+(Hh-22)+' L'+x(0)+' '+(Hh-22)+'Z" fill="rgba(255,255,255,.22)"/><path d="'+p+'" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>';
+const im=m.h.indexOf(Math.max(...m.h));sv+='<circle cx="'+x(0)+'" cy="'+y(m.h[0])+'" r="4" fill="#fff"/><text x="'+(x(im)<24?x(im)+8:x(im)>W-24?x(im)-8:x(im))+'" y="'+(y(m.h[im])-6)+'" font-size="10" fill="#fff" text-anchor="'+(x(im)<24?'start':x(im)>W-24?'end':'middle')+'">'+m.h[im].toFixed(1)+' m</text>';
+[0,6,12,18,23].forEach(i=>{if(i<n)sv+='<text x="'+x(i)+'" y="'+(Hh-6)+'" font-size="9.5" fill="#fff" opacity=".85" text-anchor="'+(i===0?'start':i===23?'end':'middle')+'">'+(i?H.hh[i]+' h':'Ahora')+'</text>'});
+return sv+'</svg>'}
+function marHTML(m){const s=cs(),H=s.h24||syn24(s),w=m.h[0],mx=Math.max(...m.h),nv=marNivel(w),mj=marMejor(m,H),mr=marMarea(m,H),resaca=(m.swp||m.p||0)>=11&&w>=1,chip=(t,v)=>'<div><small>'+t+'</small><b>'+v+'</b></div>';
+let ch=chip('Periodo',m.p!=null?Math.round(m.p)+' s':'—')+chip('Viene del',m.dir!=null?compasTxt(m.dir)+' '+flechaHacia(m.dir):'—')+(m.sst!=null?chip('Agua',Math.round(m.sst)+'°'):'')+chip('Máx. próx. 24 h',mx.toFixed(1)+' m');
+if(m.sw)ch+=chip('Mar de fondo',m.sw[0].toFixed(1)+' m'+(m.swp!=null?' · '+Math.round(m.swp)+' s':'')+(m.swd!=null?' · del '+compasTxt(m.swd):''));
+if(m.ol)ch+=chip('Oleaje por viento',m.ol[0].toFixed(1)+' m');
+if(m.cv!=null)ch+=chip('Corriente',m.cv.toFixed(1)+' km/h');
+if(mr)ch+=chip('Marea (estimada)',(mr.sube?'▲ subiendo':'▼ bajando')+(mr.hora!=null?' · '+(mr.alta?'pleamar':'bajamar')+' ~'+mr.hora+' h':''));
+if(mj)ch+=chip('Mejor momento hoy',mj.ini+' a '+mj.fin+' h · ~'+mj.v.toFixed(1)+' m');
+return '<h2>🌊 Mar y olas</h2><div class="marwrap"><canvas id="marcv" aria-label="Animación del oleaje"></canvas></div>'
++'<div class="bandera" style="border-color:'+nv.col+'"><span class="bdg" style="background:'+nv.col+'"></span><div><b>Bandera '+nv.b+' · oleaje '+nv.n+'</b><small>'+nv.t+'</small></div></div>'
++(resaca?'<div class="al ojo"><span class="ic">⚠️</span><div><b>Posibles corrientes de resaca</b><small>Hay mar de fondo largo (periodo de '+Math.round(m.swp||m.p)+' s). Báñate solo donde haya salvavidas.</small></div></div>':'')
++'<div class="mgrid">'+ch+'</div>'+marGrafica(m,H,mj)
++'<p class="note">'+(m.km>0?'Datos del mar a unos '+m.km+' km de tu ubicación, hacia el sur. ':'')+'La bandera es una guía general de la app, no oficial. Modelos: Copernicus Marine, ECMWF, NOAA y DWD vía Open-Meteo; la marea es una estimación. Las condiciones en cada playa varían: hazles caso a los salvavidas y a los avisos oficiales.</p>'}
+function marEscena(c,W,H,t,m,est){const noche=isDark(nowH()),w=Math.max(0,m.h[0]),p=Math.max(4,m.p||8),A=Math.max(3,Math.min(28,w*12)),lam=Math.max(70,Math.min(240,p*20)),vel=lam/p*.9,dx=Math.sin(((m.dir||200)+180)*Math.PI/180)>=0?1:-1,nv=marNivel(w),base=H*.6;
+const fase=(x,f,ph)=>x/lam*6.283-dx*t*vel/lam*6.283*f+ph,y0=x=>base+Math.sin(fase(x,1,0))*A+Math.sin(x*.013+t*.6)*A*.25;
+const sk=c.createLinearGradient(0,0,0,base);if(noche){sk.addColorStop(0,'#0b1233');sk.addColorStop(1,'#2a3a78')}else{sk.addColorStop(0,'#3f9be6');sk.addColorStop(1,'#c4e8ff')}c.fillStyle=sk;c.fillRect(0,0,W,H);
+if(noche){estrellasDib(c,t,est);luna(c,W*.84,30,12)}else sol(c,W*.84,34,12,t,.5);
+const col=noche?['rgba(8,30,85,.97)','rgba(18,55,125,.92)','rgba(55,105,175,.85)']:['rgba(20,100,185,.97)','rgba(40,140,215,.9)','rgba(115,190,242,.85)'];
+const capa=(k,f,ph,dy,cl)=>{c.fillStyle=cl;c.beginPath();c.moveTo(0,H);for(let x=0;x<=W;x+=5)c.lineTo(x,k===1?y0(x):base+dy+Math.sin(fase(x,f,ph))*A*k+Math.sin(x*.013+t*.6)*A*.2);c.lineTo(W,H);c.closePath();c.fill()};
+capa(1,1,0,0,col[0]);
+if(w>.9){c.fillStyle='rgba(255,255,255,.7)';for(let x=0;x<=W;x+=9){if(Math.sin(fase(x,1,0))>.93){c.beginPath();c.arc(x,y0(x)-1,1.8+(w>1.8?1.2:0),0,7);c.fill()}}}
+const bx=W*.5,by=y0(bx)-3,sl=Math.atan2(y0(bx+10)-y0(bx-10),20);c.save();c.translate(bx,by);c.rotate(sl*.8);c.font='30px system-ui,sans-serif';c.textAlign='center';c.fillText('⛵',0,2);c.restore();
+capa(.7,1.25,1.7,7,col[1]);capa(.5,1.6,3.1,16,col[2]);
+const fx=24,fb=base+22,ft=fb-72;c.strokeStyle='rgba(255,255,255,.92)';c.lineWidth=3;c.beginPath();c.moveTo(fx,fb);c.lineTo(fx,ft);c.stroke();c.fillStyle=nv.col;c.beginPath();c.moveTo(fx,ft);
+for(let i=0;i<=10;i++)c.lineTo(fx+i*4.4,ft+Math.sin(t*5-i*.7)*2.4*(i/10)+i*.25);for(let i=10;i>=0;i--)c.lineTo(fx+i*4.4,ft+20+Math.sin(t*5-i*.7)*2.4*(i/10)+i*.25);c.closePath();c.fill();
+textoGrande(c,w.toFixed(1)+' m',W/2,H*.28+2,36)}
+function iniciarMarAnim(m){const cv=$('marcv');if(!cv)return;const d=Math.min(2,devicePixelRatio||1),W=cv.clientWidth||320,H=cv.clientHeight||170;cv.width=W*d;cv.height=H*d;const c=cv.getContext('2d');
+const est=Array.from({length:30},()=>({x:Math.random()*W,y:Math.random()*H*.5,p:Math.random()*6}));let t0=null,visible=true,corre=false;
+const dib=t=>{c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,W,H);try{marEscena(c,W,H,t,m,est)}catch(e){console.error('escena mar',e)}};
+const paso=now=>{if(!document.body.contains(cv))return;if(!visible){corre=false;return}if(t0===null)t0=now;dib((now-t0)/1000);if(SAVER||NOANIM){corre=false;return}requestAnimationFrame(paso)};
+const arrancar=()=>{if(corre)return;corre=true;requestAnimationFrame(paso)};
+try{new IntersectionObserver(es=>{visible=es[0].isIntersecting;if(visible)arrancar()}).observe(cv)}catch(e){arrancar()}
+if(SAVER||NOANIM)dib(2.2);else arrancar()}
 
 /* Compartir el pronóstico como imagen. */
 async function shareImg(){const s=cs(),cn=document.createElement('canvas');cn.width=1080;cn.height=1920;const x=cn.getContext('2d'),dk=isDarkUI(),k=dk&&cur!=='night'?.62:0,gr=x.createLinearGradient(0,0,0,1920);gr.addColorStop(0,k?mixc(s.a,k):s.a);gr.addColorStop(1,k?mixc(s.b,k):s.b);x.fillStyle=gr;x.fillRect(0,0,1080,1920);
@@ -508,14 +689,18 @@ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=
 /* Datos: descarga del pronóstico, caché sin conexión y actualización. */
 let LASTTS=0,STALE=false;
 function setUpd(){const b=$('upd');if(!b||!LASTTS)return;b.textContent=(STALE?'📴 Sin conexión · datos de '+(Date.now()-LASTTS<6e4?'hace un momento':ago(Date.now()-LASTTS)):'🔄 Actualizado '+ago(Date.now()-LASTTS));b.classList.toggle('stale',STALE)}
+let ESTADO0={cur:'sun',ts:0};
+function recalcEstadoCache(){const n=new Date(),hr=n.getHours(),nm=hr*60+n.getMinutes(),mm=t=>{const a=t.split(':');return +a[0]*60+ +a[1]},sr=D.sr&&D.ss;
+const luz=sr?(nm>mm(D.sr)&&nm<mm(D.ss)):(hr>=6&&hr<18);
+D.sun=luz?(sr?Math.min(.97,Math.max(.03,(nm-mm(D.sr))/(mm(D.ss)-mm(D.sr)))):.5):null;
+const c0=ESTADO0.cur,llueve=(c0==='rain'||c0==='storm')&&Date.now()-ESTADO0.ts<72e5;
+cur=!luz?(llueve?c0:'night'):(llueve?c0:((c0==='night'||c0==='rain'||c0==='storm')?(D.c>=60?'cloud':'sun'):c0))}
 function useCache(key,label){let o=null;try{o=JSON.parse(localStorage.getItem(key))}catch(e){}
 if(!o||!o.D||Date.now()-o.ts>432e5)return false;
 const h=Math.floor((Date.now()-o.ts)/36e5);D=o.D;D.stale=true;
 if(h>0&&D.h24)Object.keys(D.h24).forEach(k=>{D.h24[k]=D.h24[k].slice(h)});
 if(D.d7&&new Date(o.ts).toDateString()!==new Date().toDateString()&&D.d7.length>1){D.d7=D.d7.slice(1);D.d7[0].n='Hoy'}
-const n=new Date(),hr=n.getHours(),nm=hr*60+n.getMinutes(),mm=t=>{const a=t.split(':');return +a[0]*60+ +a[1]};
-D.sun=(D.sr&&D.ss&&nm>mm(D.sr)&&nm<mm(D.ss))?Math.min(.97,Math.max(.03,(nm-mm(D.sr))/(mm(D.ss)-mm(D.sr)))):null;
-cur=(hr>=19||hr<5)?'night':(o.cur==='night'?(D.c>=60?'cloud':'sun'):o.cur);
+ESTADO0={cur:o.cur,ts:o.ts};recalcEstadoCache();
 LASTTS=o.ts;STALE=true;$('city').textContent=label;$('g').style.visibility='visible';render();hideSplash();setUpd();return true}
 async function load(lat,lon,label){
 const KEY='wx:'+(+lat).toFixed(2)+','+(+lon).toFixed(2);
@@ -545,7 +730,8 @@ navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>load(p.coords.
 function iniciarRed(){
 $('upd').onclick=()=>{$('upd').textContent='🔄 Actualizando…';start()};
 setInterval(setUpd,30000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&LASTTS&&Date.now()-LASTTS>6e5)start()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(LASTTS&&Date.now()-LASTTS>(SAVER?18e5:6e5))start();else if(HORA_R!==-1&&nowH()!==HORA_R){if(STALE&&D)recalcEstadoCache();render()}});
+setInterval(()=>{if(STALE&&D&&ESTADO0.ts){const a=cur,b=D.sun===null;recalcEstadoCache();if(cur!==a||(D.sun===null)!==b)render()}},60000);
 addEventListener('online',()=>{if(STALE)start()});
 }
 
@@ -553,7 +739,7 @@ addEventListener('online',()=>{if(STALE)start()});
 function arrancar(){
 setTimeout(hideSplash,9000);
 if(DEMO){hideSplash();$('tabs').style.display='flex';$('foot').textContent='Modo demo: datos de ejemplo.'}
-else{$('t').textContent='--°';$('c').textContent='';$('s').textContent='Cargando…';$('g').style.visibility='hidden';start();setInterval(()=>{if(!SAVER||Date.now()-LASTTS>18e5)start()},900000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&(!SAVER||Date.now()-LASTTS>18e5))start()})}
+else{$('t').textContent='--°';$('c').textContent='';$('s').textContent='Cargando…';$('g').style.visibility='hidden';start();setInterval(()=>{if(!SAVER||Date.now()-LASTTS>18e5)start()},900000)}
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js');
 }
 /* orden de arranque */
@@ -562,7 +748,10 @@ iniciarAjustes();
 iniciarTema();
 iniciarAhorro();
 iniciarPestanas();
+iniciarGato();
 iniciarCanvas();
+iniciarCristal();
+iniciarInclinar();
 iniciarSonido();
 render();
 arrancarAnimacion();
